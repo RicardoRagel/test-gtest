@@ -15,7 +15,11 @@ cmake ..    # Configure the project, downloading GoogleTest
 make        # Compile the project, including also the compilation of GoogleTest
 ```
 
-It will also compile an Example C++ library and include the fo
+It will also compile an Example C++ library and compile the GoogleTest project as a submodule and generate the provided example google test.
+
+## Using VSCode
+
+Although it is possible to build the project and run the test in the terminal, in case you are using VSCode, some extensions are interesting to execute everything directly from VSCode: [CMake Tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools) and [C++ TestMate](https://marketplace.visualstudio.com/items?itemName=matepek.vscode-catch2-test-adapter). The first one will help us compiling the project and allowing to check this compilation graphically. The second one will allow us to run, check and debug the google tests.
 
 ## Testing
 
