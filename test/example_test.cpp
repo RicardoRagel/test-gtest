@@ -364,3 +364,49 @@ TEST_P(ParametrizedTestClass, TestValidName)
 INSTANTIATE_TEST_SUITE_P(MultipleTests,
                          ParametrizedTestClass,
                          testing::Values("Ricardo", "Paula", "Miguel"));
+
+//------------------------------------------------------------------------------------------------------------------
+// Demonstrate how to use Typed Tests
+// They allow to repeat the same test logic over a list of types. 
+// You only need to write the test logic once, although you must know the type list when writing typed tests.
+
+// First, it is necessary to define a fixture class, templatized, so we can use it with all our types
+template <typename T>
+class TemplatizedTest : public testing::Test 
+{
+    public:
+        void addElement(T element)
+        {
+            m_list.push_back(element);
+        }
+        size_t getSize()
+        {
+            return m_list.size();
+        }
+
+    private:
+        std::vector<T> m_list;
+};
+
+// Then, we also need to define our types list
+using MyTypes = ::testing::Types<char, int, unsigned int>;
+
+// And associate it with our templatized fixture class
+TYPED_TEST_SUITE(TemplatizedTest, MyTypes);
+
+// Finally, creates the test using the fixture class (that already has the types associated)
+TYPED_TEST(TemplatizedTest, CheckAddElements) 
+{
+    // Inside a test, refer to the special name TypeParam to get the type
+    // parameter.  
+    TypeParam n;
+
+    // Since we are inside a derived class template, C++ requires
+    // us to visit the members of TemplatizedTest via 'this'.
+    this->addElement(n);
+    this->addElement(n);
+    this->addElement(n);
+
+    // And test
+    EXPECT_EQ(this->getSize(), 3);
+}
