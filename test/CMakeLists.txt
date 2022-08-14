@@ -5,10 +5,10 @@ add_executable(example_test
     example_test.cpp
 )
 # Linking to the test program the GTest libraries and our Example lib.
-# Updarte: Including also gMock if it will be used, for example, to use Matchers
+# Update: Including also gMock only to use the EXPECT_THAT assertion and Matchers
 target_link_libraries(example_test 
     GTest::gtest_main 
-    GTest::gmock_main
+    GTest::gmock
     Example
 )
 
