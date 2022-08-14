@@ -39,8 +39,14 @@ Another way to execute the tests is simply executing the generated executable pr
 ./test/example_test
 ```
 
-The result is the same, although the output information and colors could be better/different and it allows some arguments like `--gtest_filter` to run just a specific or a specific group of tests, for example:
+The result is the same, although the output information and colors could be better/different and it allows some arguments like `--gtest_filter` to run just a specific or a specific group (using *) of tests, for example:
 
 ```bash
 ./test/example_test --gtest_filter=ExampleTestClass.TestSquare
+```
+
+To check the complete list of test, another option can be used:
+
+```bash
+./test/example_test --gtest_list_tests
 ```
