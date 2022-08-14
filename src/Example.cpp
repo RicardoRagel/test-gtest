@@ -21,4 +21,23 @@ namespace Example
 
         return result;
     }
+
+    Addition::Addition(int x, int y)
+    {
+        m_x = x;
+        m_y = y;
+        m_sum = m_x + m_y;
+    }
+
+    Addition::Addition(Addition &a)
+    {
+        m_x = a.m_x;
+        m_y = a.m_y;
+        m_sum = a.m_sum;
+    }
+
+    int Addition::get_sum()
+    {
+        return m_sum;
+    }
 }

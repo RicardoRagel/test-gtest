@@ -114,3 +114,80 @@ TEST_F(ExampleTestClass, TestSquare)
     setX(-std::rand());
     EXPECT_FALSE(Example::square_if_positive(getX(), result_square));
 }
+
+// Demonstrate how to use "Explicit Success and Failure"
+TEST(ExplicitSuccessAndFailure, ExplicitSuccess)
+{
+    int8_t select = 2;
+    switch(select)
+    {
+        case 1:
+            std::cout << "1" << std::endl;
+            SUCCEED();
+            break;
+        case 2:
+            std::cout << "2" << std::endl;
+            SUCCEED();
+            break;
+        default:
+            std::cout << "default" << std::endl;
+            FAIL();
+    }
+}
+TEST(ExplicitSuccessAndFailure, ExplicitFailure)
+{
+    int8_t select = 45;
+    switch(select)
+    {
+        case 1:
+            std::cout << "1" << std::endl;
+            SUCCEED();
+            break;
+        case 2:
+            std::cout << "2" << std::endl;
+            SUCCEED();
+            break;
+        default:
+            std::cout << "default" << std::endl;
+            FAIL() << "Non-expected Option";
+    }
+}
+
+// Demonstrate how to use "Expected Predicate Assertions"
+bool allPositive(int a, int b, int c)
+{
+    return ( a>=0 ) && ( b>=0 ) && ( c>=0 )? true : false;
+}
+TEST(ExpectedPredicate, TestOK)
+{
+    // the "3" means 3 arguments
+    EXPECT_PRED3(allPositive, 33, 69, 72);
+}
+TEST(ExpectedPredicate, TestFAIL)
+{
+    // the "3" means 3 arguments
+    EXPECT_PRED3(allPositive, 33, -69, 72);
+}
+
+// Demonstrate how to create our own Assertion
+// We simply need to create a function that returns a testing::AssertionResult object,
+// that can be OK (testing::AssertionSuccess()) or FAIL (testing::AssertionFailure())
+testing::AssertionResult testCopyAdditionObjects(Example::Addition &add)
+{
+    Example::Addition new_add = add; 
+
+    if(new_add.get_sum() == add.get_sum())
+    {
+        return testing::AssertionSuccess();
+    }
+    else
+    {
+        return testing::AssertionFailure() << "Copy constructor fails, sum's are not equals";
+    }
+}
+TEST(UsingCustomAssertion, TestAdditionCopyConstructor)
+{
+    Example::Addition add(std::rand(), std::rand());
+
+    EXPECT_TRUE(testCopyAdditionObjects(add));
+}
