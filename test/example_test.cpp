@@ -191,3 +191,35 @@ TEST(UsingCustomAssertion, TestAdditionCopyConstructor)
 
     EXPECT_TRUE(testCopyAdditionObjects(add));
 }
+
+// Demonstrate how to compare floating numbers where an epsilon difference is acceptable
+TEST(FloatingNumberComparision, TestExpectedEqual)
+{
+    double num1     = 33.33334;
+    double num2     = 33.3334;
+    
+    EXPECT_EQ   (num1, num2);
+}
+TEST(FloatingNumberComparision, TestExpectedNear)
+{
+    double num1     = 33.33334;
+    double num2     = 33.3334;
+    double epsilon  =  0.0001;
+    EXPECT_NEAR (num1, num2, epsilon);
+}
+
+// Demonstrate how to use the built-in library of "Matchers" to execute other generic tests
+// see https://google.github.io/googletest/reference/matchers.html#generic-comparison
+#include "gmock/gmock.h"
+TEST(Matchers, TestStringMatchers)
+{
+    std::string str = "This is a test";
+    EXPECT_THAT(str, ::testing::StartsWith("This is"));
+    EXPECT_THAT(str, ::testing::HasSubstr("test"));
+}
+TEST(Matchers, TestPointerMatchers)
+{
+    int* ptr = NULL;
+    EXPECT_THAT(ptr, ::testing::NotNull());
+}
+

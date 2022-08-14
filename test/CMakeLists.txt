@@ -4,9 +4,11 @@ cmake_minimum_required(VERSION 3.14)    # or the version you have installed
 add_executable(example_test 
     example_test.cpp
 )
-# Linking to the test program the GTest libraries and our Example lib
+# Linking to the test program the GTest libraries and our Example lib.
+# Updarte: Including also gMock if it will be used, for example, to use Matchers
 target_link_libraries(example_test 
     GTest::gtest_main 
+    GTest::gmock_main
     Example
 )
 
