@@ -62,7 +62,9 @@ TEST(ExampleTest, TestSquare)
     EXPECT_FALSE(Example::square_if_positive(x_neg, result_square));
 }
 
-// Demonstrate how to encapsulate data for our tests using a "::testing::Test" derived class
+//------------------------------------------------------------------------------------------------------------------
+// Demonstrate how to encapsulate data for our tests using test fixture object, that simply are 
+// "::testing::Test" derived class where we can define the necessary variables and functions for our tests,
 // and how to override the "SetUp" and "TearDown" (closing function) to manipulate this data
 // This is useful when our test are using/doing always the same kind of things, so we don't
 // have to repeat it in everyone.
@@ -114,7 +116,11 @@ TEST_F(ExampleTestClass, TestSquare)
     setX(-std::rand());
     EXPECT_FALSE(Example::square_if_positive(getX(), result_square));
 }
+// more information: https://google.github.io/googletest/advanced.html#sharing-resources-between-tests-in-the-same-test-suite
+// for example, it is important to know that each test uses a new test fixture object, but we can use SetUpTestSuite if we need
+// that some of these variables are shared between these objects (basically, statics).
 
+//------------------------------------------------------------------------------------------------------------------
 // Demonstrate how to use "Explicit Success and Failure"
 TEST(ExplicitSuccessAndFailure, ExplicitSuccess)
 {
@@ -153,6 +159,7 @@ TEST(ExplicitSuccessAndFailure, ExplicitFailure)
     }
 }
 
+//------------------------------------------------------------------------------------------------------------------
 // Demonstrate how to use "Expected Predicate Assertions"
 bool allPositive(int a, int b, int c)
 {
@@ -169,6 +176,7 @@ TEST(ExpectedPredicate, TestFAIL)
     EXPECT_PRED3(allPositive, 33, -69, 72);
 }
 
+//------------------------------------------------------------------------------------------------------------------
 // Demonstrate how to create our own Assertion
 // We simply need to create a function that returns a testing::AssertionResult object,
 // that can be OK (testing::AssertionSuccess()) or FAIL (testing::AssertionFailure())
@@ -192,6 +200,7 @@ TEST(UsingCustomAssertion, TestAdditionCopyConstructor)
     EXPECT_TRUE(testCopyAdditionObjects(add));
 }
 
+//------------------------------------------------------------------------------------------------------------------
 // Demonstrate how to compare floating numbers where an epsilon difference is acceptable
 TEST(FloatingNumberComparision, TestExpectedEqual)
 {
@@ -208,6 +217,7 @@ TEST(FloatingNumberComparision, TestExpectedNear)
     EXPECT_NEAR (num1, num2, epsilon);
 }
 
+//------------------------------------------------------------------------------------------------------------------
 // Demonstrate how to use the built-in library of "Matchers" to execute other generic tests
 // see https://google.github.io/googletest/reference/matchers.html#generic-comparison
 #include "gmock/gmock.h"
@@ -223,3 +233,134 @@ TEST(Matchers, TestPointerMatchers)
     EXPECT_THAT(ptr, ::testing::NotNull());
 }
 
+//------------------------------------------------------------------------------------------------------------------
+// Demonstrate how to use Death Tests to check if a piece of code (that can be simply a function)
+// exit correctly or not. 
+// Note that the piece of code under test can be a compound statement
+// Note that the last argument can be a Matcher or simply a regex expresion to check the expected error message (std::cerr)
+TEST(DeathTests, TestExitCorrectly)
+{
+    EXPECT_EXIT
+    (
+        {
+            int positive_value = 3;
+            Example::finish_positively(positive_value);
+        },
+        testing::ExitedWithCode(0),
+        ""
+    );
+}
+TEST(DeathTests, TestExitWithError)
+{
+    EXPECT_EXIT
+    (
+        {
+            int positive_value = -3;
+            Example::finish_positively(positive_value);
+        },
+        testing::ExitedWithCode(0),
+        ""
+    );
+}
+TEST(DeathTests, TestDeath)
+{
+    EXPECT_DEATH
+    (
+        {
+            int positive_value = -3;
+            Example::finish_positively(positive_value);
+        },
+        ""
+    );
+}
+
+//------------------------------------------------------------------------------------------------------------------
+// Demonstrate how to use Traces to make easier knowing what/where is failing our test
+// In this case, let's create a test sub-routine, and call it from our test from several places
+void test_multiple_square_if_positive(int n)
+{
+    int garbage;
+    EXPECT_TRUE( Example::square_if_positive(n-1, garbage) ); 
+    EXPECT_TRUE( Example::square_if_positive(n-2, garbage) );
+}
+TEST(TracingTests, TestScopeTrace)
+{   
+    // Let's create a scope where failures will include the following trace
+    {
+        SCOPED_TRACE("First part of the TestScopeTrace");
+        test_multiple_square_if_positive(2);
+    }
+    // Let's create another scope where failures will include the following trace
+    {
+        SCOPED_TRACE("Second part of the TestScopeTrace");
+        test_multiple_square_if_positive(1);
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------
+// A warning about the use of subroutines and failures assertion
+// When an ASSERTION test fails within a subroutine, this subroutines ends, but it doesn't mean that the 
+// test has finished, it will continue from that subroutine calling next line.
+void subroutine()
+{
+    ASSERT_TRUE(false) << "Fail 1 inside the subroutine"; // It will fail
+
+    // So this next line will not be executed
+}
+TEST(PropagatingFailures, TestSubroutine1)
+{
+    subroutine();
+
+    ASSERT_TRUE(false) << "Fail 2 outside the subroutine"; // It will be executed (and fail) although we could think
+                                                           // it would not be executed due to subroutine() failed
+}
+// To avoid it (i.e. if subroutine fails the test ends up):
+TEST(PropagatingFailures, TestSubroutine2)
+{
+    subroutine();
+
+    if(HasFatalFailure()) return;
+
+    ASSERT_TRUE(false) << "Fail 2 outside the subroutine"; // It will be executed (and fail) although we could think
+                                                           // it would not be executed due to subroutine() failed
+}
+
+//------------------------------------------------------------------------------------------------------------------
+// Demonstrate how to write Value-Parametrized Tests
+// This is useful when we want to repeat tests with different inputs all at once
+
+// First, we need to define a fixture class, that derived from testing::Test, but in this case using a derived one:
+// testing::TestWithParamInterface<T>, that basically is the same but allowing us to introduce a parameter of type T.
+// In this case, we want to test that a series of input names are in a list that we have in our Example library.
+class ParametrizedTestClass : public testing::TestWithParam<const char *>
+{
+    public:
+        bool isValidName()
+        {
+            // To access the param, we can use the GetParam() member of TestWithParam class
+            const char * param = GetParam();
+            bool result = false;
+            for(auto name : Example::valid_names)
+            {
+                if(strcmp(name.c_str(), param) == 0)
+                {
+                    result = true;
+                    break;
+                }
+            }
+
+            return result;
+        }
+};
+
+// Then, we use the TEST_P ("pattern" or "parametrized") to create the type of test that we are interested.
+// Note that we are passing the previous fixture class and using its method directly.
+TEST_P(ParametrizedTestClass, TestValidName)
+{
+    // Here we can also use GetParam(), but in this case we are already doing it in the class
+    EXPECT_TRUE(isValidName());
+}
+
+INSTANTIATE_TEST_SUITE_P(MultipleTests,
+                         ParametrizedTestClass,
+                         testing::Values("Ricardo", "Paula", "Miguel"));

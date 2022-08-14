@@ -40,4 +40,17 @@ namespace Example
     {
         return m_sum;
     }
+
+    void finish_positively(int positive_num)
+    {
+        if(positive_num >=0)
+        {
+            // Exit successfully
+            exit(0);
+        }
+        else
+        {
+            exit(1);
+        }
+    }
 }
