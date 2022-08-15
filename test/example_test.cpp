@@ -218,22 +218,6 @@ TEST(FloatingNumberComparision, TestExpectedNear)
 }
 
 //------------------------------------------------------------------------------------------------------------------
-// Demonstrate how to use the built-in library of "Matchers" to execute other generic tests
-// see https://google.github.io/googletest/reference/matchers.html#generic-comparison
-#include "gmock/gmock.h"
-TEST(Matchers, TestStringMatchers)
-{
-    std::string str = "This is a test";
-    EXPECT_THAT(str, ::testing::StartsWith("This is"));
-    EXPECT_THAT(str, ::testing::HasSubstr("test"));
-}
-TEST(Matchers, TestPointerMatchers)
-{
-    int* ptr = NULL;
-    EXPECT_THAT(ptr, ::testing::NotNull());
-}
-
-//------------------------------------------------------------------------------------------------------------------
 // Demonstrate how to use Death Tests to check if a piece of code (that can be simply a function)
 // exit correctly or not. 
 // Note that the piece of code under test can be a compound statement
